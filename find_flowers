@@ -1,0 +1,139 @@
+https://codeshare.io/50gbzg
+Dataset link: 
+https://drive.google.com/drive/folders/1VRzVM7uJ94rz0_kf6Y97ISMAl__0oE6k?usp=sharing
+
+
+##CNN
+
+# !pip install tensorflow==2.9
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+!pip install unrar
+
+! unrar x /content/drive/MyDrive/CNN_IPT/flower_photos.rar /content/drive/MyDrive/CNN_IPT/Extracted/
+
+import tensorflow as tf
+# Importing the libraries for the layers of CNN
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D,MaxPooling2D,Flatten,Dense,Dropout,BatchNormalization
+
+# Importing the library for image handling/preprocessing
+from tensorflow.keras.preprocessing import image
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
+
+data_dir= '/content/drive/MyDrive/CNN_IPT/Extracted/flower_photos'
+
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+train_datagen=ImageDataGenerator(rescale=1/255.,
+        rotation_range=45,     #Random rotation between 0 and 45
+        width_shift_range=0.2,   #% shift
+        height_shift_range=0.2,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True,
+        fill_mode='reflect')
+        
+test_datagen=ImageDataGenerator(rescale=1/255.) 
+
+training_set=train_datagen.flow_from_directory(data_dir+'/Training',
+                                              target_size=(128,128),
+                                              batch_size=128,
+                                              class_mode='categorical')
+                                              
+test_set=test_datagen.flow_from_directory(data_dir+'/Testing',
+                                              target_size=(128,128),
+                                              batch_size=128,
+                                              class_mode='categorical')
+                                              
+classifier = Sequential() # Sequentialy we are going to add the layers in this network
+
+#Define the convolution layer with 16 kernals each of size 3x3
+# This layer will accept the images of size 128x128x3
+# Activation function for this layer is ReLU
+classifier.add(Conv2D(16, (3, 3), input_shape = (128, 128, 3),
+                      activation = 'relu'))
+
+#Maxpool layer generally defined at the end of each convolution layer.
+#Poolsize of 2x2 will bring down the feature map(convolution layer output) size by half
+classifier.add(MaxPooling2D(pool_size = (2, 2)))
+classifier.add(Dropout(0.2))
+
+# Define the second convolution and maxpool layer
+classifier.add(Conv2D(32, (3, 3), activation = 'relu'))
+classifier.add(MaxPooling2D(pool_size = (2, 2)))
+
+#Third Convolution and Maxpool Layer
+classifier.add(Conv2D(64, (3, 3), activation = 'relu'))
+classifier.add(MaxPooling2D(pool_size = (2, 2)))
+
+# Flatten the feature map produced by the last convolution layer as single vector
+classifier.add(Flatten())
+classifier.add(Dropout(0.2))
+#classifier.add(BatchNormalization())
+#Add the hidden layers
+classifier.add(Dense(units = 128,activation = 'relu'))
+
+# Output layer should have 5 neurons as this data is having 5 classes of flowers
+#"Softmax" activation function is preferred for Multiclass problem
+classifier.add(Dense(units = 5, activation = 'softmax'))
+
+classifier.summary()
+
+#compile the CNN model with 'adam' optimizer to minimize the loss (cross entropy)
+classifier.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = ['accuracy'])
+
+# Fit(Train) the model using trainset of data
+# How many time the weight needs to be updated in one iteratin will be decided by steps_per_epoch
+# How many iteration for which the training need to be happen will be decided by 'epochs'
+classifier.fit(training_set,
+                         steps_per_epoch =2736//128,
+                         epochs = 5,
+                         validation_data = test_set,
+                         validation_steps = 934//128)
+                         
+#Libraries for loading image and visualising the output of each layer
+from tensorflow.keras.preprocessing.image import img_to_array, load_img
+import tensorflow as tf
+import numpy as np
+from matplotlib import pyplot as plt
+import warnings
+warnings.filterwarnings('ignore')
+
+classifier.save('my_model.keras')
+
+my_saved_model=tf.keras.models.load_model('/content/my_model.keras')
+
+import cv2
+img=cv2.imread('/content/drive/MyDrive/CNN_IPT/Extracted/flower_photos/example/3.jpg')
+img=cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+plt.imshow(img)
+plt.show()
+
+test_img1=cv2.resize(img,(128,128))
+test_img1=test_img1/255.
+test_img1.shape
+
+
+ypred=my_saved_model.predict(test_img2,verbose=0)
+ypred.round(2)
+
+print(training_set.class_indices)
+
+ypred.argmax()
+
+#print(train_set.class_indices)
+print('The test image class is :',ypred.argmax())
+#training_set.class_indices
+class_name={'daisy': 0, 'dandelion': 1, 'roses': 2, 'sunflowers': 3, 'tulips': 4}
+
+pos=np.array(list(class_name.values()))==ypred.argmax()
+name=np.array(list(class_name.keys()))
+print('The Predicted class name is:')
+print(name[pos][0])
