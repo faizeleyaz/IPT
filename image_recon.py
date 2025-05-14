@@ -1,10 +1,8 @@
-
-https://github.com/ashishpatel26/500-AI-Machine-learning-Deep-learning-Computer-vision-NLP-Projects-with-code
-    
-    
-https://codeshare.io/adwO8K
-https://drive.google.com/drive/folders/1VRzVM7uJ94rz0_kf6Y97ISMAl__0oE6k?usp=sharing
-run this code in jupiter notebooks
+# Reference Links
+# https://github.com/ashishpatel26/500-AI-Machine-learning-Deep-learning-Computer-vision-NLP-Projects-with-code    
+# https://codeshare.io/adwO8K
+# https://drive.google.com/drive/folders/1VRzVM7uJ94rz0_kf6Y97ISMAl__0oE6k?usp=sharing
+# run this code in jupiter notebooks
 
 
 import numpy as np
